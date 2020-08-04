@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>wave :D</title>
+<style>
+body{
+margin: 0;
+padding: 0;
+overflow-y: hidden;
+
+}
+#content{
+	position: absolute;
+	top: 0;
+z-index: -1;
+}
+
+</style>
+</head>
+<body>
+  <input type="file" id="thefile" accept="audio/*" / style="margin-top: 50px">
+  <audio id="audio" controls></audio>
+<div id="content">
+<canvas id="canvas" ></canvas>
+</div>
+</body>
+<script>
+window.onload = function() {
+  var file = document.getElementById("thefile");
+  var audio = document.getElementById("audio");
+    	// audio.style.display = "none"; 
+  file.onchange = function() {
+    var files = this.files;
+    audio.src = URL.createObjectURL(files[0]);
+    audio.load();
+    audio.play();
+   var context = new (window.AudioContext || window.webkitAudioContext)();
+var analyser = context.createAnalyser();
+var source = context.createMediaElementSource(audio);
+source.connect(analyser);
+analyser.connect(context.destination);
+frequency_array = new Uint8Array(analyser.frequencyBinCount);
+ var canvas = document.getElementById("canvas");
+   canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+ctx = canvas.getContext("2d");
+center_x = canvas.width / 2;
+center_y = canvas.height / 2;
+radius = 100;
+ctx.beginPath();
+// ctx.arc(center_x,center_y,radius,0,2*Math.PI);
+// ctx.stroke();
+for(var i = 0; i < bars; i++){
+rads = Math.PI * 2 / bars;
+bar_height = 100;
+bar_width = 2;
+x = center_x + Math.cos(rads * i) * (radius);
+y = center_y + Math.sin(rads * i) * (radius);
+x_end = center_x + Math.cos(rads * i)*(radius + bar_height);
+y_end = center_y + Math.sin(rads * i)*(radius + bar_height);
+//draw a bar
+drawBar(x, y, x_end, y_end, bar_width);
+}
+var canvas, ctx, center_x, center_y, radius, bars, 
+x_end, y_end, bar_height, bar_width,
+frequency_array;
+bars = 200;
+bar_width = 2;
+ var bufferLength = analyser.frequencyBinCount;
+    console.log(bufferLength);
+
+    var dataArray = new Uint8Array(bufferLength);
+
+    var WIDTH = canvas.width;
+    var HEIGHT = canvas.height;
+
+    var barWidth = (WIDTH / bufferLength) * 5;
+    var barHeight;
+    var x = 0;
+
+function child(){
+	 requestAnimationFrame(child);
+
+      x = 0;
+
+      analyser.getByteFrequencyData(dataArray);
+
+     
+
+      for (var i = 0; i <bufferLength; i++) {
+        barHeight = dataArray[i]/2;
+        
+        var r = barHeight + (25 * (i/bars));
+        var g = 250 * (i/bars);
+        var b = 205;
+
+        ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+        ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+        x += barWidth + 2;
+      }
+}
+
+    function renderFrame() {
+// set to the size of device
+canvas = document.getElementById("canvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+ctx = canvas.getContext("2d");
+center_x = canvas.width / 2;
+center_y = canvas.height / 2;
+radius = 100;
+var gradient = ctx.createLinearGradient(0,0,0,canvas.height);
+gradient.addColorStop(0,"rgba(35, 7, 77, 1)");
+gradient.addColorStop(1,"rgba(204, 83, 51, 1)");
+ctx.fillStyle = gradient;
+ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.beginPath();
+// ctx.arc(center_x,center_y,radius,0,2*Math.PI);
+// ctx.stroke();
+analyser.getByteFrequencyData(frequency_array);
+for(var i = 0; i < bars; i++){
+
+rads = Math.PI * 2 / bars;
+bar_height = frequency_array[i]*0.7;
+
+  x = center_x + Math.cos(rads * i) * (radius);
+  y = center_y + Math.sin(rads * i) * (radius);
+  x_end = center_x + Math.cos(rads * i)*(radius + bar_height);
+  y_end = center_y + Math.sin(rads * i)*(radius + bar_height);
+     x_end1 = center_x + Math.cos(rads * i)*(radius + bar_height)*0.4;
+  y_end1 = center_y + Math.sin(rads * i)*(radius + bar_height)*0.4;
+
+
+
+drawBar(x, y, x_end1, y_end1, bar_width,frequency_array[i]);
+drawBar(x, y, x_end, y_end, bar_width,frequency_array[i]*10);
+
+}
+window.requestAnimationFrame(renderFrame);
+}
+function drawBar(x1, y1, x2, y2, width,frequency){
+var lineColor = "rgb(" + frequency + ", " + frequency + ", " + 205 + ")";
+ctx.strokeStyle = lineColor;
+ctx.lineWidth = width;
+ctx.beginPath();
+ctx.moveTo(x1,y1);
+ctx.lineTo(x2,y2);
+ctx.stroke();
+}
+
+  audio.play();
+    renderFrame();
+    child();
+
+  };
+};
+
+</script>
+</html>
